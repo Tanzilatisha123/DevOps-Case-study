@@ -1,6 +1,6 @@
 .git
 __pycache__
 *.pyc
-tests
 k8s
 Jenkinsfile
+ 
