@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = 'YOUR_DOCKERHUB_USERNAME'      // <-- change
+        DOCKERHUB_USER = 'tanzila123'      // <-- change this
         IMAGE_NAME     = "${DOCKERHUB_USER}/student-task-manager"
         IMAGE_TAG      = "${env.BUILD_NUMBER}"
     }
 
     triggers {
-        githubPush()          // fires on GitHub webhook push
+        githubPush()
     }
 
     stages {
@@ -16,20 +16,16 @@ pipeline {
             steps { checkout scm }
         }
 
-        stage('Test') {
+        stage('Build Docker Image') {
             steps {
-                sh '''
-                  python3 -m venv .venv
-                  . .venv/bin/activate
-                  pip install -r requirements.txt
-                  pytest -q
-                '''
+                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% -t %IMAGE_NAME%:latest ."
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Test') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest ."
+                // runs the pytest tests inside the freshly built image
+                bat "docker run --rm %IMAGE_NAME%:%IMAGE_TAG% python -m pytest -q"
             }
         }
 
@@ -37,10 +33,10 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
                         usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
-                    sh '''
-                      echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-                      docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                      docker push ${IMAGE_NAME}:latest
+                    bat '''
+                        echo %DH_PASS%| docker login -u %DH_USER% --password-stdin
+                        docker push %IMAGE_NAME%:%IMAGE_TAG%
+                        docker push %IMAGE_NAME%:latest
                     '''
                 }
             }
@@ -49,11 +45,11 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                      sed -i "s|DOCKERHUB_USER/student-task-manager:IMAGE_TAG|${IMAGE_NAME}:${IMAGE_TAG}|" k8s/deployment.yaml
-                      kubectl apply -f k8s/deployment.yaml
-                      kubectl apply -f k8s/service.yaml
-                      kubectl rollout status deployment/student-task-manager --timeout=120s
+                    powershell '''
+                        (Get-Content k8s/deployment.yaml) -replace 'DOCKERHUB_USER/student-task-manager:IMAGE_TAG', "$env:IMAGE_NAME`:$env:IMAGE_TAG" | Set-Content k8s/deployment.yaml
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                        kubectl rollout status deployment/student-task-manager --timeout=120s
                     '''
                 }
             }
