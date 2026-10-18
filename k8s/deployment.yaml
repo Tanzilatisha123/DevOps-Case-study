@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-task-manager
+  labels:
+    app: student-task-manager
+spec:
+  replicas: 1   # SQLite is per-pod; use a shared DB (e.g. PostgreSQL) before scaling up
+  selector:
+    matchLabels:
+      app: student-task-manager
+  template:
+    metadata:
+      labels:
+        app: student-task-manager
+    spec:
+      containers:
+        - name: flask-app
+          image: DOCKERHUB_USER/student-task-manager:IMAGE_TAG
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet: {path: /health, port: 5000}
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet: {path: /health, port: 5000}
+            initialDelaySeconds: 10

@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block content %}
+<h1>My Tasks</h1>
+<form method="get"><input name="subject" placeholder="Filter by subject" value="{{ selected }}">
+<button>Filter</button></form>
+<table><tr><th>Title</th><th>Subject</th><th>Priority</th><th>Due</th><th>Status</th><th>Actions</th></tr>
+{% for t in tasks %}<tr class="{{ 'done' if t.done }}">
+<td>{{ t.title }}</td><td>{{ t.subject }}</td><td>{{ t.priority }}</td><td>{{ t.due_date }}</td>
+<td>{{ '✅ Done' if t.done else '⏳ Pending' }}</td>
+<td>{% if not t.done %}<a href="{{ url_for('complete', task_id=t.id) }}">Complete</a> | {% endif %}
+<a href="{{ url_for('delete', task_id=t.id) }}">Delete</a></td></tr>
+{% else %}<tr><td colspan="6">No tasks yet.</td></tr>{% endfor %}</table>
+{% endblock %}

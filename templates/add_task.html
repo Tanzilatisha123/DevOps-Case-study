@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block content %}
+<h1>Add Task</h1>
+<form method="post" class="form">
+<label>Title</label><input name="title" required>
+<label>Subject</label><input name="subject" required placeholder="e.g. DevOps">
+<label>Priority</label><select name="priority"><option>Low</option><option selected>Medium</option><option>High</option></select>
+<label>Due date</label><input type="date" name="due_date">
+<button>Save Task</button></form>
+{% endblock %}

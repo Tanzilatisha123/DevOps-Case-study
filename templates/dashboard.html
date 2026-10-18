@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block content %}
+<h1>Dashboard</h1>
+<div class="cards">
+<div class="card"><h2>{{ total }}</h2>Total</div>
+<div class="card"><h2>{{ pending }}</h2>Pending</div>
+<div class="card"><h2>{{ done }}</h2>Completed</div>
+<div class="card red"><h2>{{ overdue }}</h2>Overdue</div></div>
+<h3>Upcoming deadlines</h3>
+<ul>{% for t in upcoming %}<li><b>{{ t.title }}</b> ({{ t.subject }}) – due {{ t.due_date }}</li>
+{% else %}<li>No upcoming tasks 🎉</li>{% endfor %}</ul>
+{% endblock %}

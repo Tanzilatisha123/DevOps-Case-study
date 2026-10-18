@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}
+<h1>Subjects</h1>
+<table><tr><th>Subject</th><th>Total</th><th>Completed</th></tr>
+{% for s in subjects %}<tr><td><a href="{{ url_for('tasks', subject=s.subject) }}">{{ s.subject }}</a></td>
+<td>{{ s.total }}</td><td>{{ s.done }}</td></tr>
+{% else %}<tr><td colspan="3">No subjects yet.</td></tr>{% endfor %}</table>
+{% endblock %}
